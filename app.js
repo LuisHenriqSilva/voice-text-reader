@@ -70,18 +70,21 @@ main.addEventListener('click', event => {
     }
 })
 
-let voices = []
-
-speechSynthesis.addEventListener('voiceschanged', () => {
-    voices = speechSynthesis.getVoices()       
-        
-    const optionElements = voices.reduce((accumulator, { name, lang }) => {
+const insertOptionElementIntoDOM = voices => {
+    selectElement.innerHTML = voices.reduce((accumulator, { name, lang }) => {
         accumulator += `<option value="${name}">${lang} | ${name}</option>`
         return accumulator
-    }, '') 
+    }, '')
+}
 
-    selectElement.innerHTML = optionElements
+const setUtteranceVoice = voice => {
+    utterance.voice = voice
+    const voiceOptionElement = selectElement
+        .querySelector(`[value="${voice.name}"]`)
+    voiceOptionElement.selected = true 
+}
 
+const setPTBRVoices = voices => {
     const googleVoicePtBr = voices.find(voice => 
         voice.name === 'Google português do Brasil')
 
@@ -89,30 +92,21 @@ speechSynthesis.addEventListener('voiceschanged', () => {
         voice.name === 'Google Deutsch')
     
     
-    if (googleVoicePtBr) {
-        utterance.voice = googleVoicePtBr
-        const googleOptionElement = selectElement
-            .querySelector(`[value="${googleVoicePtBr.name}"]`)
-        googleOptionElement.selected = true
-    }
+    if (googleVoicePtBr) {        
+        setUtteranceVoice(googleVoicePtBr)        
+    } else if (googleVoiceDeutsch) {
+        setUtteranceVoice(googleVoiceDeutsch)        
+    } 
+}
 
+let voices = []
 
-    // voices.forEach(({ name, lang }) => {
-    //     const option = document.createElement('option')
+speechSynthesis.addEventListener('voiceschanged', () => {
+    voices = speechSynthesis.getVoices()       
+        
+    insertOptionElementIntoDOM(voices)
 
-    //     option.value = name
-
-    //     if (googleVoicePtBr && option.value === googleVoicePtBr.name){
-            
-    //     } else if (googleVoiceDeutsch && option.value === googleVoiceDeutsch.name) {
-    //         utterance.voice = googleVoiceDeutsch
-    //         option.selected = true
-    //     } 
-
-    //     option.textContent = `${lang} | ${name}`
-    //     selectElement.appendChild(option)
-    // })
-
+    setPTBRVoices(voices)
 })
 
 buttonInsertText.addEventListener('click', () => {
